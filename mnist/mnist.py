@@ -4,8 +4,8 @@ import tensorflow as tf
 import skflow
 import numpy as np
 
-train=pd.read_csv('F:/demo/kaggle/mnist/train.csv')
-test=pd.read_csv('F:/demo/kaggle/mnist/test.csv')
+train=pd.read_csv('D:/demo/kaggle/mnist/train.csv')
+test=pd.read_csv('D:/demo/kaggle/mnist/test.csv')
 X_train = train.drop('label', 1)
 y_train = train['label']
 X_test=test
@@ -45,4 +45,4 @@ conv_y_predict=[]
 for i in np.arange(100,28001,100):
     conv_y_predict=np.append(conv_y_predict,classifier.predict(X_test[i-100:i]))
 conv_submission=pd.DataFrame({'ImageId':range(1,28001),'Label':np.int32(conv_y_predict)})
-conv_submission.to_csv('F:/demo/kaggle/mnist/conv_512_0008_submission.csv',index=False)
+conv_submission.to_csv('D:/demo/kaggle/mnist/conv_512_0008_submission.csv',index=False)

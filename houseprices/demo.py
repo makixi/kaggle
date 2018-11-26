@@ -21,8 +21,8 @@ pd.set_option('display.float_format', lambda x: '{:.3f}'.format(x)) #Limiting fl
 
 from subprocess import check_output
 
-train = pd.read_csv('F:/demo/kaggle/houseprices/train.csv')
-test = pd.read_csv('F:/demo/kaggle/houseprices/test.csv')
+train = pd.read_csv('D:/demo/kaggle/houseprices/train.csv')
+test = pd.read_csv('D:/demo/kaggle/houseprices/test.csv')
 
 #check the numbers of samples and features
 print("The train data size before dropping Id feature is : {} ".format(train.shape))
@@ -350,15 +350,18 @@ lgb_pred = np.expm1(model_lgb.predict(test.values))
 print(rmsle(y_train, lgb_train_pred))
 sub = pd.DataFrame()
 '''RMSE on the entire Train data when averaging'''
-for i in range(50,98,2):
-    p1=i/100
-    p2=(100-i)/2/100
-    print('RMSLE score on train data:')
-    print(rmsle(y_train, stacked_train_pred * p1 + xgb_train_pred * p2 + lgb_train_pred * p2))
-    ensemble = stacked_pred * p1 + xgb_pred * p2 + lgb_pred * p2
+for i in range(50,100):
+	for j in range(0,50):
+		if (i+j)>100:continue
+		p1=i/100
+		p2=j/100
+		p3=(100-i-j)/100
+		print(str(i)+' '+str(j)+'RMSLE score on train data:')
+		print(rmsle(y_train, stacked_train_pred * p1 + xgb_train_pred * p2 + lgb_train_pred * p3))
+		ensemble = stacked_pred * p1 + xgb_pred * p2 + lgb_pred * p3
 
 
-    sub['Id'] = test_ID
-    sub['SalePrice'] = ensemble
-    sub.to_csv('F:/demo/kaggle/houseprices/'+str(i)+'_pred_submission.csv', index=False)
+		sub['Id'] = test_ID
+		sub['SalePrice'] = ensemble
+		sub.to_csv('D:/demo/kaggle/houseprices/'+str(i)+'_'+str(j)+'pred_submission.csv', index=False)
 
