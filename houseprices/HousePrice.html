@@ -1394,11 +1394,10 @@ body .markdown-body
 </tr>
 </tbody>
 </table>
-<p>PS:累死我了……</p>
 <hr />
 <h3 id="_3">数据处理<a class="headerlink" href="#_3" title="Permanent link"></a></h3>
 <p>首先通过作图探究一下数据中是否存在<strong>离群点</strong>。若有，就去掉，以免其对于整体的影响。<br>
-*PS：离群点的移除不一定对于余下工程结果存在积极影响，这是一次尝试。并且这两个离群点离群很远*
+<em>PS：离群点的移除不一定对于余下工程结果存在积极影响，这是一次尝试。并且这两个离群点离群很远</em>
 <div class="codehilite"><pre><span class="n">fig</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">ax</span><span class="o">=</span><span class="n">fig</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;1stFlrSF&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;2ndFlrSF&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;TotalBsmtSF&#39;</span><span class="p">]),</span><span class="n">y</span><span class="o">=</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;SalePrice&#39;</span><span class="p">])</span>
@@ -1407,4 +1406,192 @@ body .markdown-body
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="c1">#去掉离群点</span>
 <span class="n">train</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">train</span><span class="p">[((</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;1stFlrSF&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;2ndFlrSF&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;TotalBsmtSF&#39;</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">6000</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;SalePrice&#39;</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">200000</span><span class="p">)]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</pre></div></p></article></body></html>
+</pre></div></p>
+<hr />
+<h4 id="_4">重要数据关系正态分布<a class="headerlink" href="#_4" title="Permanent link"></a></h4>
+<p><em>线性模型会喜欢正态分布的数据，所以先对数据进行观测。再对其进行处理，使之更接近于正态分布</em>
+<div class="codehilite"><pre><span class="c1">#观察与正态分布的距离</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">distplot</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;SalePrice&#39;</span><span class="p">],</span><span class="n">fit</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+<span class="p">(</span><span class="n">mu</span><span class="p">,</span><span class="n">sigma</span><span class="p">)</span><span class="o">=</span><span class="n">norm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;SalePrice&#39;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s">&#39;Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)],</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;best&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&quot;SalePrice distribution&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&quot;Frequency&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+<span class="c1">#qq plot</span>
+<span class="n">fig</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">res</span><span class="o">=</span><span class="n">stats</span><span class="o">.</span><span class="n">probplot</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;SalePrice&#39;</span><span class="p">],</span><span class="n">plot</span><span class="o">=</span><span class="n">plt</span><span class="p">)</span>
+<span class="n">plr</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">train</span><span class="p">[</span><span class="s">&#39;SalePrice&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s">&#39;SalePrice&#39;</span><span class="p">])</span>
+</pre></div></p>
+<hr />
+<h4 id="_5">多缺失属性忽略<a class="headerlink" href="#_5" title="Permanent link"></a></h4>
+<p>接下俩进行下一步数据分析。在表格中存在一些属性，几乎都是nan，这些属性对于接下来的分析归类没有作用，所以可以舍去。
+<div class="codehilite"><pre><span class="n">all_data_na</span><span class="o">=</span><span class="p">(</span><span class="n">all_data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="n">all_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">all_data_na</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">all_data_na</span><span class="p">[</span><span class="n">all_data_na</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">all_data_na</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">all_data_na</span><span class="p">)</span>
+
+<span class="n">all_data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s">&#39;Id&#39;</span><span class="p">,</span> <span class="s">&#39;PoolQC&#39;</span><span class="p">,</span> <span class="s">&#39;MiscFeature&#39;</span><span class="p">,</span> <span class="s">&#39;Alley&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div></p>
+<hr />
+<h4 id="_6">缺失数据填充<a class="headerlink" href="#_6" title="Permanent link"></a></h4>
+<p>对于 None值的填充
+<div class="codehilite"><pre><span class="c1"># 分离类别特征和数值特征</span>
+<span class="n">numeric_feats</span> <span class="o">=</span> <span class="n">all_data</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="n">all_data</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">!=</span> <span class="s">&#39;object&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+<span class="n">category_feats</span> <span class="o">=</span> <span class="n">all_data</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="n">all_data</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">==</span> <span class="s">&#39;object&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+
+<span class="c1"># 缺失值填充,类别特征缺失填充None，数值特征缺失填充均值</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">category_feats</span><span class="p">:</span>
+    <span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s">&quot;None&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_feats</span><span class="p">:</span>
+    <span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">mode</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div></p>
+<hr />
+<h4 id="_7">字符类型与数值类型按需转换<a class="headerlink" href="#_7" title="Permanent link"></a></h4>
+<div class="codehilite"><pre><span class="c1"># 将数值特征转化为类别特征</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;MSSubClass&#39;</span><span class="p">,</span> <span class="s">&#39;OverallCond&#39;</span><span class="p">,</span> <span class="s">&#39;YrSold&#39;</span><span class="p">,</span> <span class="s">&#39;MoSold&#39;</span><span class="p">):</span>
+    <span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+<span class="n">cols</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;FireplaceQu&#39;</span><span class="p">,</span> <span class="s">&#39;BsmtQual&#39;</span><span class="p">,</span> <span class="s">&#39;BsmtCond&#39;</span><span class="p">,</span> <span class="s">&#39;GarageQual&#39;</span><span class="p">,</span> <span class="s">&#39;GarageCond&#39;</span><span class="p">,</span> 
+        <span class="s">&#39;ExterQual&#39;</span><span class="p">,</span> <span class="s">&#39;ExterCond&#39;</span><span class="p">,</span><span class="s">&#39;HeatingQC&#39;</span><span class="p">,</span>  <span class="s">&#39;KitchenQual&#39;</span><span class="p">,</span> <span class="s">&#39;BsmtFinType1&#39;</span><span class="p">,</span> 
+        <span class="s">&#39;BsmtFinType2&#39;</span><span class="p">,</span> <span class="s">&#39;Functional&#39;</span><span class="p">,</span> <span class="s">&#39;Fence&#39;</span><span class="p">,</span> <span class="s">&#39;BsmtExposure&#39;</span><span class="p">,</span> <span class="s">&#39;GarageFinish&#39;</span><span class="p">,</span> <span class="s">&#39;LandSlope&#39;</span><span class="p">,</span>
+        <span class="s">&#39;LotShape&#39;</span><span class="p">,</span> <span class="s">&#39;PavedDrive&#39;</span><span class="p">,</span> <span class="s">&#39;Street&#39;</span><span class="p">,</span>  <span class="s">&#39;CentralAir&#39;</span><span class="p">,</span> <span class="s">&#39;MSSubClass&#39;</span><span class="p">,</span> <span class="s">&#39;OverallCond&#39;</span><span class="p">,</span> 
+        <span class="s">&#39;YrSold&#39;</span><span class="p">,</span> <span class="s">&#39;MoSold&#39;</span><span class="p">)</span>
+
+<span class="c1"># 类型=》数值</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+    <span class="n">lbl</span><span class="o">=</span><span class="n">LabelEncoder</span><span class="p">()</span>
+    <span class="n">lbl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+    <span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">=</span><span class="n">lbl</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+</pre></div>
+
+<hr />
+<h4 id="_8">数值特征正态化<a class="headerlink" href="#_8" title="Permanent link"></a></h4>
+<p><a href="https://wenku.baidu.com/view/96140c8376a20029bd642de3.html">boxcox变换方法及实现应用</a></p>
+<h2 id="skewed_feats-all_datanumeric_featsapplylambda-x-skewxdropnasort_valuesascendingfalse-printnskew-in-numerical-features-n-skewness-pddataframeskew-skewed_feats-printskewnesshead10-skewness-skewnessabsskewness-075-printthere-are-skewed-numerical-features-to-box-cox-transformformatskewnessshape0-skewed_features-skewnessindex-lam-015-for-feat-in-skewed_features-all_datafeat-boxcox1pall_datafeat-lam"><div class="codehilite"><pre><span class="n">skewed_feats</span> <span class="o">=</span> <span class="n">all_data</span><span class="p">[</span><span class="n">numeric_feats</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">skew</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dropna</span><span class="p">()))</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Skew in numerical features: </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="n">skewness</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">&#39;Skew&#39;</span> <span class="p">:</span><span class="n">skewed_feats</span><span class="p">})</span>
+<span class="k">print</span><span class="p">(</span><span class="n">skewness</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+
+
+<span class="n">skewness</span> <span class="o">=</span> <span class="n">skewness</span><span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">skewness</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.75</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="s">&quot;There are {} skewed numerical features to Box Cox transform&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">skewness</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+
+
+<span class="n">skewed_features</span> <span class="o">=</span> <span class="n">skewness</span><span class="o">.</span><span class="n">index</span>
+<span class="n">lam</span> <span class="o">=</span> <span class="mf">0.15</span>
+<span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">skewed_features</span><span class="p">:</span>
+    <span class="n">all_data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span> <span class="o">=</span> <span class="n">boxcox1p</span><span class="p">(</span><span class="n">all_data</span><span class="p">[</span><span class="n">feat</span><span class="p">],</span> <span class="n">lam</span><span class="p">)</span>
+</pre></div><a class="headerlink" href="#skewed_feats-all_datanumeric_featsapplylambda-x-skewxdropnasort_valuesascendingfalse-printnskew-in-numerical-features-n-skewness-pddataframeskew-skewed_feats-printskewnesshead10-skewness-skewnessabsskewness-075-printthere-are-skewed-numerical-features-to-box-cox-transformformatskewnessshape0-skewed_features-skewnessindex-lam-015-for-feat-in-skewed_features-all_datafeat-boxcox1pall_datafeat-lam" title="Permanent link"></a></h2>
+<h4 id="_9">标准化<a class="headerlink" href="#_9" title="Permanent link"></a></h4>
+<p><a href="https://blog.csdn.net/bbbeoy/article/details/73662455">标准化处理</a></p>
+<hr />
+<h3 id="_10">建模<a class="headerlink" href="#_10" title="Permanent link"></a></h3>
+<h4 id="lasso-regression">Lasso Regression<a class="headerlink" href="#lasso-regression" title="Permanent link"></a></h4>
+<p>Lasso是在线性模型上加上了一个l1正则项<br>
+<a href="https://blog.csdn.net/daunxx/article/details/51596877">Lasso Regression</a></p>
+<hr />
+<h4 id="elastic-net">Elastic Net<a class="headerlink" href="#elastic-net" title="Permanent link"></a></h4>
+<p>ElasticNet 是一种使用L1和L2先验作为正则化矩阵的线性回归模型.这种组合用于只有很少的权重非零的稀疏模型.<br>
+可以使用 l1_ratio 参数来调节L1和L2的凸组合(一类特殊的线性组合)。 <br>
+当多个特征和另一个特征相关的时候弹性网络非常有用。Lasso倾向于随机选择其中一个，而ElasticNet更倾向于选择两个. </p>
+<div class="codehilite"><pre><span class="c1">#帮助elasticnet选参数</span>
+<span class="c1"># 帮助elasticnet选择参数</span>
+<span class="n">alphas</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+<span class="n">train_errors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">alphas</span><span class="p">:</span>
+    <span class="n">ent</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="n">ENet</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">MinMaxScaler</span><span class="p">(),</span> <span class="n">ent</span><span class="p">)</span>
+    <span class="n">train_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rmsle_cv</span><span class="p">(</span><span class="n">ENet</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+<span class="n">i_alpha_optim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">train_errors</span><span class="p">)</span>
+<span class="n">alpha_optim</span> <span class="o">=</span> <span class="n">alphas</span><span class="p">[</span><span class="n">i_alpha_optim</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="s">&quot;Optimal regularization parameter : </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">alpha_optim</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">alphas</span><span class="p">,</span> <span class="n">train_errors</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;Train&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">alpha_optim</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">train_errors</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span>
+           <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;Optimum on test&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;lower left&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Regularization parameter&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Performance&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+<hr />
+<h4 id="kernelridge">KernelRidge<a class="headerlink" href="#kernelridge" title="Permanent link"></a></h4>
+<p>使用核技巧的岭回归（L2正则线性回归），它的学习形式和SVR（support vector regression）相同，但是两者的损失函数不同：KRR使用的L2正则均方误差；SVR使用的是带L2正则的ϵ-insensitive loss：max(0,|y−hθ(x)|−ϵ)<br>
+KRR有近似形式的解，并且在中度规模的数据时及其有效率，由于KRR没有参数稀疏化的性能，因此速度上要慢于SVR（它的损失函数有利于得到稀疏化的解）。 <br>
+KRR的最小二乘解：β=((K+λI)^-1)y，w=∑βiXi，这里的K是核函数。最小二乘解不适用于大规模数据。<br>
+<a href="https://blog.csdn.net/qsczse943062710/article/details/76021034">Kernel Ridge Regression</a></p>
+<hr />
+<h4 id="gradientboostingregressor">GradientBoostingRegressor<a class="headerlink" href="#gradientboostingregressor" title="Permanent link"></a></h4>
+<p><a href="https://blog.csdn.net/u013395516/article/details/79809797?utm_source=blogxgwz7">GradientBoostingRegressor</a><br>
+1.learning_rate： 
+控制每个树的作用有多大；值稍微小点好些；但如果太小则需要更多树； 
+2.n_estimators 
+树的个数；树太多容易过拟合，最好使用CV来调整以确定学习速率 
+3.subsample 
+训练某棵树时候，采用的样本的比重（往往使用80%）</p>
+<hr />
+<p>调参过程
+<div class="codehilite"><pre><span class="n">param_test2</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;max_depth&#39;</span><span class="p">:</span><span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="s">&#39;min_samples_split&#39;</span><span class="p">:</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">1</span><span class="p">)}</span>
+<span class="n">gsearch2</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                                   <span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">max_features</span><span class="o">=</span><span class="s">&#39;sqrt&#39;</span><span class="p">,</span>
+                                   <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                   <span class="n">loss</span><span class="o">=</span><span class="s">&#39;lad&#39;</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">warm_start</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                                    <span class="n">param_grid</span> <span class="o">=</span> <span class="n">param_test2</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s">&#39;neg_mean_squared_error&#39;</span><span class="p">,</span><span class="n">iid</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">gsearch2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">gsearch2</span><span class="o">.</span><span class="n">param_grid</span><span class="p">,</span><span class="n">gsearch2</span><span class="o">.</span><span class="n">best_params_</span><span class="p">,</span><span class="n">gsearch2</span><span class="o">.</span><span class="n">best_score_</span><span class="p">)</span>
+
+
+<span class="n">param_test4</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;max_features&#39;</span><span class="p">:</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">1</span><span class="p">)}</span>
+<span class="n">gsearch4</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                                   <span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
+                                   <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                   <span class="n">loss</span><span class="o">=</span><span class="s">&#39;lad&#39;</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">warm_start</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> 
+                       <span class="n">param_grid</span> <span class="o">=</span> <span class="n">param_test4</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s">&#39;neg_mean_squared_error&#39;</span><span class="p">,</span><span class="n">iid</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">gsearch4</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">gsearch4</span><span class="o">.</span><span class="n">param_grid</span><span class="p">,</span> <span class="n">gsearch4</span><span class="o">.</span><span class="n">best_params_</span><span class="p">,</span> <span class="n">gsearch4</span><span class="o">.</span><span class="n">best_score_</span><span class="p">)</span>
+
+<span class="n">param_test5</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;subsample&#39;</span><span class="p">:[</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">0.8</span><span class="p">,</span><span class="mf">0.85</span><span class="p">,</span><span class="mf">0.9</span><span class="p">]}</span>
+<span class="n">gsearch5</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">GradientBoostingRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                                   <span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">max_features</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+                                   <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                   <span class="n">loss</span><span class="o">=</span><span class="s">&#39;lad&#39;</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">warm_start</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> 
+                       <span class="n">param_grid</span> <span class="o">=</span> <span class="n">param_test5</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s">&#39;neg_mean_squared_error&#39;</span><span class="p">,</span><span class="n">iid</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">gsearch5</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">gsearch5</span><span class="o">.</span><span class="n">param_grid</span><span class="p">,</span> <span class="n">gsearch5</span><span class="o">.</span><span class="n">best_params_</span><span class="p">,</span> <span class="n">gsearch5</span><span class="o">.</span><span class="n">best_score_</span><span class="p">)</span>
+
+
+
+<span class="n">model_xgb</span><span class="o">=</span><span class="n">make_pipeline</span><span class="p">)</span><span class="n">MinMaxScaler</span><span class="p">(),</span><span class="n">xgb</span><span class="o">.</span><span class="n">XGBRegressor</span><span class="p">(</span><span class="n">colsample_bytree</span><span class="o">=</span><span class="mf">0.4603</span><span class="p">,</span><span class="n">gamma</span><span class="o">=</span><span class="mf">0.0468</span><span class="p">,</span>
+                                            <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                            <span class="n">min_child_weight</span><span class="o">=</span><span class="mf">1.7817</span><span class="p">,</span><span class="n">n_estimators</span><span class="p">)</span>
+
+<span class="n">model_xgb</span> <span class="o">=</span>  <span class="n">make_pipeline</span><span class="p">(</span><span class="n">MinMaxScaler</span><span class="p">(),</span><span class="n">xgb</span><span class="o">.</span><span class="n">XGBRegressor</span><span class="p">(</span><span class="n">colsample_bytree</span><span class="o">=</span><span class="mf">0.4603</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.0468</span><span class="p">,</span> 
+                             <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> 
+                             <span class="n">min_child_weight</span><span class="o">=</span><span class="mf">1.7817</span><span class="p">,</span> <span class="n">n_estimators</span><span class="o">=</span><span class="mi">2200</span><span class="p">,</span>
+                             <span class="n">reg_alpha</span><span class="o">=</span><span class="mf">0.4640</span><span class="p">,</span> <span class="n">reg_lambda</span><span class="o">=</span><span class="mf">0.8571</span><span class="p">,</span>
+                             <span class="n">subsample</span><span class="o">=</span><span class="mf">0.5213</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">random_state</span> <span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">nthread</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">score</span> <span class="o">=</span> <span class="n">rmsle_cv</span><span class="p">(</span><span class="n">model_xgb</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">&quot;Xgboost score: {:.4f} ({:.4f})</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">score</span><span class="o">.</span><span class="n">std</span><span class="p">()))</span>
+
+<span class="n">model_lgb</span> <span class="o">=</span>  <span class="n">make_pipeline</span><span class="p">(</span><span class="n">RobustScaler</span><span class="p">(),</span><span class="n">lgb</span><span class="o">.</span><span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">objective</span><span class="o">=</span><span class="s">&#39;regression&#39;</span><span class="p">,</span><span class="n">num_leaves</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                              <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">n_estimators</span><span class="o">=</span><span class="mi">720</span><span class="p">,</span>
+                              <span class="n">max_bin</span> <span class="o">=</span> <span class="mi">55</span><span class="p">,</span> <span class="n">bagging_fraction</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+                              <span class="n">bagging_freq</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">feature_fraction</span> <span class="o">=</span> <span class="mf">0.2319</span><span class="p">,</span>
+                              <span class="n">feature_fraction_seed</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">bagging_seed</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+                              <span class="n">min_data_in_leaf</span> <span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">min_sum_hessian_in_leaf</span> <span class="o">=</span> <span class="mi">11</span><span class="p">))</span>
+<span class="n">score</span> <span class="o">=</span> <span class="n">rmsle_cv</span><span class="p">(</span><span class="n">model_lgb</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">&quot;LGBM score: {:.4f} ({:.4f})</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">score</span><span class="o">.</span><span class="n">std</span><span class="p">()))</span>
+</pre></div></p>
+<h4 id="xgbregressor">XGBRegressor<a class="headerlink" href="#xgbregressor" title="Permanent link"></a></h4>
+<p><a href="https://blog.csdn.net/sb19931201/article/details/52557382">XGBoost</a></p>
+<p>通常认为对它影响比较大的参数有：</p></article></body></html>
