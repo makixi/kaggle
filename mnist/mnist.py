@@ -39,11 +39,11 @@ def conv_model(X,y):
     h_fc1=skflow.ops.dnn(h_pool2_flat,[1024],activation=tf.nn.relu,keep_prob=0.5)
     return skflow.models.logistic_regression(h_fc1,y)
 
-classifier=skflow.TensorFlowEstimator(model_fn=conv_model,n_classes=10,batch_size=512,steps=20000,learning_rate=0.016)
+classifier=skflow.TensorFlowEstimator(model_fn=conv_model,n_classes=10,batch_size=512,steps=20000,learning_rate=0.01)
 classifier.fit(X_train,y_train)
 
 conv_y_predict=[]
 for i in np.arange(100,28001,100):
     conv_y_predict=np.append(conv_y_predict,classifier.predict(X_test[i-100:i]))
 conv_submission=pd.DataFrame({'ImageId':range(1,28001),'Label':np.int32(conv_y_predict)})
-conv_submission.to_csv('F:/demo/kaggle/mnist/conv_512_0016_submission.csv',index=False)
+conv_submission.to_csv('F:/demo/kaggle/mnist/conv_512_0010_submission.csv',index=False)
